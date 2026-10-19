@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedStock · Complete with Database</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: #f4f9fc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: #1f4f3b;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 30, 20, 0.25);
+            border-bottom: 4px solid #f5c542;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: #f5c542;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #e3f0e8;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            transition: 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .nav-links a i {
+            margin-right: 6px;
+        }
+
+        .nav-links a:hover {
+            background: #2e7a5a;
+            color: white;
+        }
+
+        .nav-links a.active {
+            background: #f5c542;
+            color: #1f4f3b;
+            box-shadow: 0 0 0 2px #f5d97a;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #1f4f3b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .page-header h1 i {
+            color: #f5c542;
+            font-size: 2rem;
+        }
+
+        .page-header p {
+            color: #2a5b4a;
+            margin-top: 6px;
+            font-size: 1.1rem;
+        }
+
+        .db-status {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #cfe8d6;
+            color: #1a6b3a;
+            margin-left: 10px;
+        }
+
+        .db-status.error {
+            background: #fad1c4;
+            color: #a84a1a;
+        }
+
+        .db-status i {
+            color: inherit !important;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem 1.2rem;
+            border-radius: 24px;
+            box-shadow: 0 6px 18px rgba(0, 40, 30, 0.06);
+            border-left: 8px solid #1f4f3b;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .stat-card:nth-child(2) {
+            border-left-color: #f5c542;
+        }
+        .stat-card:nth-child(3) {
+            border-left-color: #d48c2c;
+        }
+        .stat-card:nth-child(4) {
+            border-left-color: #2f8f5a;
+        }
+
+        .stat-card i {
+            font-size: 2.4rem;
+            color: #1f4f3b;
+            width: 3rem;
+            text-align: center;
+        }
+
+        .stat-card:nth-child(2) i {
+            color: #c99a2b;
+        }
+        .stat-card:nth-child(3) i {
+            color: #b87a1f;
+        }
+        .stat-card:nth-child(4) i {
+            color: #268f4e;
+        }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #2d5e48;
+            letter-spacing: 0.3px;
+        }
+
+        .stat-info .number {
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #1f4f3b;
+            line-height: 1.2;
+        }
+
+        .stat-info .sub {
+            font-size: 0.75rem;
+            color: #4d7a62;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem 1rem 1rem 1rem;
+            box-shadow: 0 8px 28px rgba(0, 30, 20, 0.05);
+            border: 1px solid #d4e8dd;
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 0.5rem 1rem 0.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-header h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1f4f3b;
+        }
+
+        .table-header h2 i {
+            color: #f5c542;
+            margin-right: 8px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-group input {
+            padding: 0.5rem 1rem;
+            border: 2px solid #c8ddd0;
+            border-radius: 40px;
+            background: #fafffd;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.2s;
+            width: 180px;
+        }
+
+        .filter-group input:focus {
+            border-color: #1f4f3b;
+            box-shadow: 0 0 0 3px rgba(31, 79, 59, 0.15);
+        }
+
+        .filter-group button {
+            background: #f5c542;
+            border: none;
+            color: #1f4f3b;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 2px solid #f5c542;
+        }
+
+        .filter-group button:hover {
+            background: #e6b53a;
+            border-color: #d9a531;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem 0.5rem 0.8rem 0.5rem;
+            color: #1f4f3b;
+            font-weight: 600;
+            border-bottom: 2px solid #c8ddd0;
+            letter-spacing: 0.3px;
+        }
+
+        td {
+            padding: 0.9rem 0.5rem;
+            border-bottom: 1px solid #d4e8dd;
+            color: #1d3f30;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #d4e8dd;
+            color: #1f4f3b;
+        }
+
+        .status-badge.low {
+            background: #fcf1d6;
+            color: #8f6d1f;
+        }
+        .status-badge.critical {
+            background: #fad1c4;
+            color: #a84a1a;
+        }
+        .status-badge.in-stock {
+            background: #cfe8d6;
+            color: #1a6b3a;
+        }
+
+        .action-icons i {
+            margin: 0 6px;
+            color: #3d7b62;
+            cursor: pointer;
+            transition: 0.15s;
+            font-size: 1.1rem;
+        }
+
+        .action-icons i:hover {
+            opacity: 1;
+            color: #1f4f3b;
+        }
+
+        .action-icons i.fa-trash:hover {
+            color: #c0392b;
+        }
+
+        .page-panel {
+            display: none;
+            background: white;
+            border-radius: 28px;
+            padding: 2rem 2rem;
+            box-shadow: 0 8px 28px rgba(0, 30, 20, 0.05);
+            border: 1px solid #d4e8dd;
+        }
+
+        .page-panel.active-page {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1f4f3b;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.7rem 1rem;
+            border: 2px solid #c8ddd0;
+            border-radius: 40px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: #1f4f3b;
+            box-shadow: 0 0 0 3px rgba(31, 79, 59, 0.15);
+        }
+
+        .btn-primary {
+            background: #1f4f3b;
+            color: white;
+            padding: 0.7rem 2rem;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary:hover {
+            background: #2e7a5a;
+            transform: translateY(-1px);
+        }
+
+        .btn-yellow {
+            background: #f5c542;
+            color: #1f4f3b;
+            padding: 0.7rem 2rem;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .btn-yellow:hover {
+            background: #e6b53a;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: #c0392b;
+            color: white;
+            padding: 0.7rem 2rem;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .btn-danger:hover {
+            background: #e74c3c;
+            transform: translateY(-1px);
+        }
+
+        .footer-note {
+            margin-top: 2.5rem;
+            text-align: center;
+            color: #2d5e48;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            border-top: 1px solid #c8ddd0;
+            padding-top: 1.8rem;
+        }
+
+        .footer-note i {
+            margin: 0 4px;
+        }
+        .footer-note .yellow-dot {
+            color: #f5c542;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1f4f3b;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #f5c542;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: #a84a1a;
+            border-left-color: #f5c542;
+        }
+
+        .settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        @media (max-width: 700px) {
+            .navbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+            }
+            .nav-links {
+                justify-content: center;
+            }
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            .filter-group input {
+                width: 140px;
+            }
+            .stat-card {
+                padding: 1rem 0.8rem;
+            }
+            .settings-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        tr.low-stock td {
+            background-color: #fffae6;
+        }
+        tr.critical-stock td {
+            background-color: #ffefeb;
+        }
+
+        /* live search highlight */
+        .highlight {
+            background-color: #f5e56b;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-pills"></i> MedStock
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a class="nav-link active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a class="nav-link" data-page="inventory"><i class="fas fa-boxes"></i> Inventory</a>
+            <a class="nav-link" data-page="add"><i class="fas fa-plus-circle"></i> Add</a>
+            <a class="nav-link" data-page="reports"><i class="fas fa-chart-line"></i> Reports</a>
+            <a class="nav-link" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div id="toast" class="toast"></div>
+
+        <!-- DASHBOARD -->
+        <div id="page-dashboard" class="page-panel active-page">
+            <div class="page-header">
+                <h1>
+                    <i class="fas fa-capsules"></i> Medicine Stock Checker
+                    <span id="dbStatus" class="db-status"><i class="fas fa-spinner fa-spin"></i> Connecting...</span>
+                </h1>
+                <p><i class="fas fa-arrow-right" style="color:#1f4f3b;"></i> Real‑time inventory · <strong>IndexedDB Database</strong></p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                    <div class="stat-info">
+                        <h3>Total medicines</h3>
+                        <div class="number" id="totalMedCount">0</div>
+                        <div class="sub">in database</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-exclamation-triangle" style="color:#c99a2b;"></i>
+                    <div class="stat-info">
+                        <h3>Low stock</h3>
+                        <div class="number" style="color:#a87d1f;" id="lowStockCount">0</div>
+                        <div class="sub">needs attention</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-circle-exclamation" style="color:#b85f1f;"></i>
+                    <div class="stat-info">
+                        <h3>Critical</h3>
+                        <div class="number" style="color:#a84a1a;" id="criticalCount">0</div>
+                        <div class="sub">reorder now</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-check-circle" style="color:#1e8b4c;"></i>
+                    <div class="stat-info">
+                        <h3>In stock</h3>
+                        <div class="number" style="color:#1a7a42;" id="inStockCount">0</div>
+                        <div class="sub">ready to dispense</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="table-header">
+                    <h2><i class="fas fa-list-ul"></i> Current stock</h2>
+                    <div class="filter-group">
+                        <input type="text" id="searchInput" placeholder="🔍 Live search..." oninput="liveSearchDashboard()">
+                        <button id="filterBtn"><i class="fas fa-filter"></i> Filter</button>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="medicineTableBody"></tbody>
+                </table>
+                <div style="padding: 0.8rem 0.5rem 0.2rem; color:#3d6e57; font-size:0.8rem; border-top: 1px solid #d4e8dd; margin-top:0.5rem;">
+                    <i class="fas fa-circle-info"></i> <span id="rowCountDisplay">0</span> medicines · IndexedDB storage
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 1.2rem; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="exportData()" style="background: #f5f0d7; padding: 0.5rem 1.2rem; border-radius: 30px; font-size:0.85rem; color:#5a4a1f; border: 1px solid #f5c542; cursor:pointer;">
+                    <i class="fas fa-download"></i> Export JSON
+                </button>
+                <button onclick="document.getElementById('fileInput').click()" style="background: #f5f0d7; padding: 0.5rem 1.2rem; border-radius: 30px; font-size:0.85rem; color:#5a4a1f; border: 1px solid #f5c542; cursor:pointer;">
+                    <i class="fas fa-upload"></i> Import JSON
+                </button>
+                <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleImport(event)">
+            </div>
+        </div>
+
+        <!-- INVENTORY -->
+        <div id="page-inventory" class="page-panel">
+            <div class="page-header">
+                <h1><i class="fas fa-boxes"></i> Full Inventory</h1>
+                <p>Manage all medicine records · stock levels &amp; categories</p>
+            </div>
+            <div class="table-wrapper">
+                <div class="table-header">
+                    <h2><i class="fas fa-warehouse"></i> Inventory list</h2>
+                    <div class="filter-group">
+                        <input type="text" id="inventorySearch" placeholder="🔍 Live search..." oninput="liveSearchInventory()">
+                        <button id="inventoryFilterBtn"><i class="fas fa-filter"></i> Filter</button>
+                    </div>
+                </div>
+                <table>
+                    <thead><tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+                    <tbody id="inventoryTableBody"></tbody>
+                </table>
+                <div style="padding: 0.8rem 0.5rem 0.2rem; color:#3d6e57; font-size:0.8rem; border-top: 1px solid #d4e8dd; margin-top:0.5rem;">
+                    <i class="fas fa-circle-info"></i> Full inventory list · <span id="inventoryCount">0</span> items
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD -->
+        <div id="page-add" class="page-panel">
+            <div class="page-header">
+                <h1><i class="fas fa-plus-circle"></i> Add New Medicine</h1>
+                <p>Enter details to add a new stock entry to the database</p>
+            </div>
+            <div style="background: #f8fcf9; border-radius: 24px; padding: 2rem; border: 1px solid #d4e8dd;">
+                <div class="form-group">
+                    <label><i class="fas fa-capsules"></i> Medicine Name *</label>
+                    <input type="text" id="addName" placeholder="e.g. Ibuprofen 400mg">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Category *</label>
+                    <input type="text" id="addCategory" placeholder="e.g. Anti-inflammatory">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-box"></i> Stock Quantity</label>
+                    <input type="number" id="addStock" placeholder="0" value="0" min="0">
+                </div>
+                <button class="btn-primary" onclick="addMedicine()"><i class="fas fa-save"></i> Add to Database</button>
+                <div style="margin-top:1.5rem; background:#f5f0d7; padding:0.8rem 1.2rem; border-radius:40px; border-left:6px solid #f5c542;">
+                    <i class="fas fa-info-circle" style="color:#1f4f3b;"></i> All data is stored locally in your browser's <strong>IndexedDB</strong> database.
+                </div>
+            </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div id="page-reports" class="page-panel">
+            <div class="page-header">
+                <h1><i class="fas fa-chart-line"></i> Reports &amp; Analytics</h1>
+                <p>Stock movement, expiries, and consumption trends</p>
+            </div>
+            <div class="placeholder-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1.5rem; margin-top:1.5rem;">
+                <div class="placeholder-card" style="background:#f8fcf9; padding:1.5rem 1rem; border-radius:20px; border-left:6px solid #1f4f3b; text-align:center; color:#1f4f3b;">
+                    <i class="fas fa-chart-pie" style="font-size:2rem; margin-bottom:0.5rem; color:#f5c542;"></i>
+                    <h3>Stock by category</h3>
+                    <p id="reportCategory">Loading...</p>
+                </div>
+                <div class="placeholder-card" style="background:#f8fcf9; padding:1.5rem 1rem; border-radius:20px; border-left:6px solid #1f4f3b; text-align:center; color:#1f4f3b;">
+                    <i class="fas fa-chart-bar" style="font-size:2rem; margin-bottom:0.5rem; color:#f5c542;"></i>
+                    <h3>Total items</h3>
+                    <p id="reportTotal">0</p>
+                </div>
+                <div class="placeholder-card" style="background:#f8fcf9; padding:1.5rem 1rem; border-radius:20px; border-left:6px solid #1f4f3b; text-align:center; color:#1f4f3b;">
+                    <i class="fas fa-clock" style="font-size:2rem; margin-bottom:0.5rem; color:#f5c542;"></i>
+                    <h3>Stock status</h3>
+                    <p id="reportStatus">Loading...</p>
+                </div>
+                <div class="placeholder-card" style="background:#f8fcf9; padding:1.5rem 1rem; border-radius:20px; border-left:6px solid #1f4f3b; text-align:center; color:#1f4f3b;">
+                    <i class="fas fa-file-alt" style="font-size:2rem; margin-bottom:0.5rem; color:#f5c542;"></i>
+                    <h3>Export data</h3>
+                    <p>Click Export on Dashboard</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="page-settings" class="page-panel">
+            <div class="page-header">
+                <h1><i class="fas fa-cog"></i> Settings</h1>
+                <p>Configure stock thresholds, notifications &amp; database management</p>
+            </div>
+            <div style="background:#f8fcf9; border-radius:24px; padding:1.5rem 2rem; border:1px solid #d4e8dd;">
+                <div class="settings-row">
+                    <div><i class="fas fa-bell" style="color:#f5c542;"></i> <strong>Low stock alert:</strong> <span style="background:#fcf1d6; padding:0.2rem 1rem; border-radius:40px;">10 units</span></div>
+                    <div><i class="fas fa-bell" style="color:#f5c542;"></i> <strong>Critical alert:</strong> <span style="background:#fad1c4; padding:0.2rem 1rem; border-radius:40px;">5 units</span></div>
+                    <div><i class="fas fa-database"></i> <strong>Storage:</strong> <span style="color:#1f4f3b;">IndexedDB</span></div>
+                    <div><button class="btn-danger" onclick="clearAllData()"><i class="fas fa-trash"></i> Clear all data</button></div>
+                </div>
+                <div style="margin-top:1.5rem; padding-top:1.5rem; border-top:1px solid #d4e8dd;">
+                    <h3><i class="fas fa-info-circle"></i> Database Information</h3>
+                    <p style="color:#3d6e57; margin-top:0.5rem;">
+                        <strong>Database Name:</strong> MedStockDB<br>
+                        <strong>Store Name:</strong> medicines<br>
+                        <strong>Records:</strong> <span id="dbRecordCount">0</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-note">
+        <i class="fas fa-copyright"></i> 2026 MedStock · <i class="fas fa-pulse fa-circle yellow-dot"></i> Complete with IndexedDB Database · Green & Yellow
+    </div>
+
+    <script>
+        // =============================================
+        // DATABASE LAYER - IndexedDB
+        // =============================================
+        const DB_NAME = 'MedStockDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'medicines';
+
+        let db = null;
+        let dbReady = false;
+        let allMedicinesCache = [];
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = () => {
+                    console.error('Database error:', request.error);
+                    reject(request.error);
+                };
+
+                request.onsuccess = () => {
+                    db = request.result;
+                    dbReady = true;
+                    document.getElementById('dbStatus').innerHTML = '<i class="fas fa-check-circle"></i> Database ready';
+                    document.getElementById('dbStatus').className = 'db-status';
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        const store = db.createObjectStore(STORE_NAME, {
+                            keyPath: 'id',
+                            autoIncrement: true
+                        });
+                        store.createIndex('name', 'name', { unique: false });
+                        store.createIndex('category', 'category', { unique: false });
+
+                        const sampleData = [
+                            { name: 'Paracetamol 500mg', category: 'Analgesic', stock: 142 },
+                            { name: 'Amoxicillin 250mg', category: 'Antibiotic', stock: 22 },
+                            { name: 'Insulin Glargine 100U', category: 'Endocrine', stock: 4 },
+                            { name: 'Atorvastatin 20mg', category: 'Lipid-lowering', stock: 87 },
+                            { name: 'Metformin 850mg', category: 'Antidiabetic', stock: 8 },
+                            { name: 'Vitamin D3 1000IU', category: 'Supplement', stock: 0 },
+                            { name: 'Omeprazole 40mg', category: 'PPI', stock: 56 }
+                        ];
+
+                        sampleData.forEach(item => {
+                            store.add(item);
+                        });
+                        console.log('Sample data inserted into IndexedDB');
+                    }
+                };
+            });
+        }
+
+        function getAllMedicines() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+                request.onsuccess = () => {
+                    allMedicinesCache = request.result;
+                    resolve(request.result);
+                };
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function getMedicine(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function addMedicineToDB(medicine) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.add(medicine);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function updateMedicineInDB(medicine) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put(medicine);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function deleteMedicineFromDB(id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.delete(id);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        function clearAllMedicines() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(STORE_NAME, 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.clear();
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // =============================================
+        // UI HELPERS
+        // =============================================
+        function getStatus(stock) {
+            if (stock <= 0) return { label: 'Critical', className: 'critical', icon: 'fa-triangle-exclamation' };
+            if (stock < 10) return { label: 'Low', className: 'low', icon: 'fa-exclamation-circle' };
+            return { label: 'In stock', className: 'in-stock', icon: 'fa-check-circle' };
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // highlight matching text
+        function highlightText(text, term) {
+            if (!term.trim()) return text;
+            const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // =============================================
+        // RENDER FUNCTIONS
+        // =============================================
+        async function renderDashboard(search = '') {
+            try {
+                if (!dbReady) {
+                    document.getElementById('medicineTableBody').innerHTML =
+                        `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#3d6e57;"><i class="fas fa-spinner fa-spin"></i> Loading database...</td></tr>`;
+                    return;
+                }
+
+                let medicines = await getAllMedicines();
+
+                if (search.trim()) {
+                    const term = search.toLowerCase().trim();
+                    medicines = medicines.filter(item =>
+                        item.name.toLowerCase().includes(term) ||
+                        item.category.toLowerCase().includes(term)
+                    );
+                }
+
+                const tbody = document.getElementById('medicineTableBody');
+
+                if (medicines.length === 0) {
+                    tbody.innerHTML =
+                        `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#3d6e57;">No medicines found</td></tr>`;
+                    document.getElementById('rowCountDisplay').textContent = '0';
+                } else {
+                    let html = '';
+                    const term = search.trim();
+                    medicines.forEach(item => {
+                        const status = getStatus(item.stock);
+                        const rowClass = status.className === 'low' ? 'low-stock' : status.className ===
+                            'critical' ? 'critical-stock' : '';
+                        const nameDisplay = term ? highlightText(item.name, term) : item.name;
+                        const categoryDisplay = term ? highlightText(item.category, term) : item.category;
+                        html += `
+                            <tr class="${rowClass}" data-id="${item.id}">
+                                <td><i class="fas fa-tablets" style="color:#1f4f3b; margin-right:10px;"></i> ${nameDisplay}</td>
+                                <td>${categoryDisplay}</td>
+                                <td class="stock-cell">${item.stock}</td>
+                                <td><span class="status-badge ${status.className}"><i class="fas ${status.icon}"></i> ${status.label}</span></td>
+                                <td class="action-icons">
+                                    <i class="fas fa-edit" onclick="editMedicine(${item.id})" title="Edit"></i>
+                                    <i class="fas fa-trash" onclick="deleteMedicine(${item.id})" title="Delete"></i>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = html;
+                    document.getElementById('rowCountDisplay').textContent = medicines.length;
+                }
+
+                // update stats
+                const all = await getAllMedicines();
+                updateStats(all);
+                updateReports(all);
+                document.getElementById('dbRecordCount').textContent = all.length;
+
+            } catch (err) {
+                console.error('Render error:', err);
+                showToast('Error loading data', true);
+            }
+        }
+
+        async function renderInventory(search = '') {
+            if (!dbReady) return;
+            let medicines = await getAllMedicines();
+            if (search.trim()) {
+                const term = search.toLowerCase().trim();
+                medicines = medicines.filter(item =>
+                    item.name.toLowerCase().includes(term) ||
+                    item.category.toLowerCase().includes(term)
+                );
+            }
+            const tbody = document.getElementById('inventoryTableBody');
+            if (medicines.length === 0) {
+                tbody.innerHTML =
+                    `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#3d6e57;">No items</td></tr>`;
+                document.getElementById('inventoryCount').textContent = '0';
+            } else {
+                let html = '';
+                const term = search.trim();
+                medicines.forEach(item => {
+                    const status = getStatus(item.stock);
+                    const rowClass = status.className === 'low' ? 'low-stock' : status.className ===
+                        'critical' ? 'critical-stock' : '';
+                    const nameDisplay = term ? highlightText(item.name, term) : item.name;
+                    const categoryDisplay = term ? highlightText(item.category, term) : item.category;
+                    html += `
+                        <tr class="${rowClass}" data-id="${item.id}">
+                            <td><i class="fas fa-tablets" style="color:#1f4f3b; margin-right:10px;"></i> ${nameDisplay}</td>
+                            <td>${categoryDisplay}</td>
+                            <td class="stock-cell">${item.stock}</td>
+                            <td><span class="status-badge ${status.className}"><i class="fas ${status.icon}"></i> ${status.label}</span></td>
+                            <td class="action-icons">
+                                <i class="fas fa-edit" onclick="editMedicine(${item.id})" title="Edit"></i>
+                                <i class="fas fa-trash" onclick="deleteMedicine(${item.id})" title="Delete"></i>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+                document.getElementById('inventoryCount').textContent = medicines.length;
+            }
+        }
+
+        function updateStats(medicines) {
+            const total = medicines.length;
+            let low = 0,
+                critical = 0,
+                inStock = 0;
+            medicines.forEach(m => {
+                const s = getStatus(m.stock);
+                if (s.className === 'low') low++;
+                else if (s.className === 'critical') critical++;
+                else inStock++;
+            });
+            document.getElementById('totalMedCount').textContent = total;
+            document.getElementById('lowStockCount').textContent = low;
+            document.getElementById('criticalCount').textContent = critical;
+            document.getElementById('inStockCount').textContent = inStock;
+        }
+
+        function updateReports(medicines) {
+            const total = medicines.length;
+            document.getElementById('reportTotal').textContent = total;
+            let catMap = {};
+            medicines.forEach(m => {
+                catMap[m.category] = (catMap[m.category] || 0) + 1;
+            });
+            const catStr = Object.keys(catMap).map(k => `${k}: ${catMap[k]}`).join(' · ') || 'No data';
+            document.getElementById('reportCategory').textContent = catStr;
+
+            let low = 0,
+                crit = 0,
+                instock = 0;
+            medicines.forEach(m => {
+                const s = getStatus(m.stock);
+                if (s.className === 'low') low++;
+                else if (s.className === 'critical') crit++;
+                else instock++;
+            });
+            document.getElementById('reportStatus').textContent = `In stock: ${instock}, Low: ${low}, Critical: ${crit}`;
+        }
+
+        // =============================================
+        // LIVE SEARCH
+        // =============================================
+        function liveSearchDashboard() {
+            const val = document.getElementById('searchInput').value;
+            renderDashboard(val);
+        }
+
+        function liveSearchInventory() {
+            const val = document.getElementById('inventorySearch').value;
+            renderInventory(val);
+        }
+
+        // =============================================
+        // CRUD ACTIONS
+        // =============================================
+        async function addMedicine() {
+            const name = document.getElementById('addName').value.trim();
+            const category = document.getElementById('addCategory').value.trim();
+            const stock = parseInt(document.getElementById('addStock').value) || 0;
+            if (!name || !category) {
+                showToast('Medicine name and category are required', true);
+                return;
+            }
+            try {
+                await addMedicineToDB({ name, category, stock });
+                showToast(`Added "${name}" successfully!`);
+                document.getElementById('addName').value = '';
+                document.getElementById('addCategory').value = '';
+                document.getElementById('addStock').value = '0';
+                await renderDashboard(document.getElementById('searchInput').value);
+                await renderInventory(document.getElementById('inventorySearch').value);
+            } catch (err) {
+                showToast('Error adding medicine', true);
+                console.error(err);
+            }
+        }
+
+        async function deleteMedicine(id) {
+            if (!confirm('Delete this medicine?')) return;
+            try {
+                const med = await getMedicine(id);
+                await deleteMedicineFromDB(id);
+                showToast(`Deleted "${med.name}"`);
+                await renderDashboard(document.getElementById('searchInput').value);
+                await renderInventory(document.getElementById('inventorySearch').value);
+            } catch (err) {
+                showToast('Error deleting', true);
+                console.error(err);
+            }
+        }
+
+        async function editMedicine(id) {
+            const med = await getMedicine(id);
+            if (!med) return;
+            const newName = prompt('Edit name:', med.name);
+            if (newName === null) return;
+            const newCategory = prompt('Edit category:', med.category);
+            if (newCategory === null) return;
+            const newStock = parseInt(prompt('Edit stock quantity:', med.stock));
+            if (isNaN(newStock)) return;
+            try {
+                await updateMedicineInDB({ ...med, name: newName.trim(), category: newCategory.trim(), stock: newStock });
+                showToast(`Updated "${newName}"`);
+                await renderDashboard(document.getElementById('searchInput').value);
+                await renderInventory(document.getElementById('inventorySearch').value);
+            } catch (err) {
+                showToast('Error updating', true);
+                console.error(err);
+            }
+        }
+
+        async function clearAllData() {
+            if (!confirm('⚠️ Delete ALL medicines from the database?')) return;
+            try {
+                await clearAllMedicines();
+                showToast('All data cleared');
+                await renderDashboard('');
+                await renderInventory('');
+            } catch (err) {
+                showToast('Error clearing data', true);
+                console.error(err);
+            }
+        }
+
+        // =============================================
+        // EXPORT / IMPORT
+        // =============================================
+        async function exportData() {
+            try {
+                const data = await getAllMedicines();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `medstock_backup_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('Export successful');
+            } catch (err) {
+                showToast('Export failed', true);
+                console.error(err);
+            }
+        }
+
+        async function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                if (!Array.isArray(data)) throw new Error('Invalid format');
+                // clear and re-import
+                await clearAllMedicines();
+                for (const item of data) {
+                    await addMedicineToDB({ name: item.name, category: item.category, stock: item.stock || 0 });
+                }
+                showToast(`Imported ${data.length} items`);
+                await renderDashboard('');
+                await renderInventory('');
+                document.getElementById('fileInput').value = '';
+            } catch (err) {
+                showToast('Import failed: ' + err.message, true);
+                console.error(err);
+            }
+        }
+
+        // =============================================
+        // NAVIGATION
+        // =============================================
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                const page = this.dataset.page;
+                document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active-page'));
+                document.getElementById(`page-${page}`).classList.add('active-page');
+                if (page === 'inventory') {
+                    renderInventory(document.getElementById('inventorySearch').value);
+                } else if (page === 'dashboard') {
+                    renderDashboard(document.getElementById('searchInput').value);
+                } else if (page === 'settings') {
+                    document.getElementById('dbRecordCount').textContent = allMedicinesCache.length;
+                }
+            });
+        });
+
+        // =============================================
+        // INIT
+        // =============================================
+        (async function init() {
+            try {
+                await openDB();
+                await renderDashboard('');
+                await renderInventory('');
+                document.getElementById('dbRecordCount').textContent = allMedicinesCache.length;
+            } catch (err) {
+                document.getElementById('dbStatus').innerHTML = '<i class="fas fa-exclamation-triangle"></i> DB error';
+                document.getElementById('dbStatus').className = 'db-status error';
+                showToast('IndexedDB not available', true);
+                console.error(err);
+            }
+        })();
+    </script>
+</body>
+</html>

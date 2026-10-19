@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedStock · Inventory</title>
+  <!-- Font Awesome 6 (Free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+
+    body {
+      background: #7097af;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ----- navigation / header with green-yellow accent ----- */
+    .navbar {
+      background: #1f4f3b;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0, 30, 20, 0.25);
+      border-bottom: 4px solid #f5c542;
+    }
+
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .logo i {
+      margin-right: 10px;
+      color: #3a9e52;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: #e3f0e8;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      transition: 0.2s;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .nav-links a i {
+      margin-right: 6px;
+    }
+
+    .nav-links a:hover {
+      background: #2e7a5a;
+      color: white;
+    }
+
+    .nav-links a.active {
+      background: #f5c542;
+      color: #1f4f3b;
+      box-shadow: 0 0 0 2px #f5d97a;
+      font-weight: 600;
+    }
+
+    /* ----- main container ----- */
+    .container {
+      max-width: 1300px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* page header */
+    .page-header {
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #983589;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-header h1 i {
+      color: #f5c542;
+      font-size: 2rem;
+    }
+
+    .page-header p {
+      color: #2a5b4a;
+      margin-top: 6px;
+      font-size: 1.1rem;
+    }
+
+    /* ----- stock summary cards (light blue / yellow) ----- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background:white(74, 72, 72);
+      padding: 1.5rem 1.2rem;
+      border-radius: 24px;
+      box-shadow: 0 6px 18px rgba(0, 40, 30, 0.06);
+      transition: 0.2s;
+      border-left: 8px solid #1f4f3b;
+      display: flex;
+      align-items: right;
+      gap: 0.8rem;
+    }
+
+    .stat-card:nth-child(2) { border-left-color: #f5c542; }
+    .stat-card:nth-child(3) { border-left-color: #d48c2c; }
+    .stat-card:nth-child(4) { border-left-color: #2f8f5a; }
+
+    .stat-card i {
+      font-size: 2.4rem;
+      color: #1f4f3b;
+      width: 3rem;
+      text-align: center;
+    }
+
+    .stat-card:nth-child(2) i { color: #c99a2b; }
+    .stat-card:nth-child(3) i { color: #b87a1f; }
+    .stat-card:nth-child(4) i { color: #268f4e; }
+
+    .stat-info h3 {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #2d5e48;
+      letter-spacing: 0.3px;
+    }
+
+    .stat-info .number {
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #1f4f3b;
+      line-height: 1.2;
+    }
+
+    .stat-info .sub {
+      font-size: 0.75rem;
+      color: #4d7a62;
+    }
+
+    /* ----- table section green-yellow accents ----- */
+    .table-wrapper {
+      background: white;
+      border-radius: 28px;
+      padding: 1.5rem 1rem 1rem 1rem;
+      box-shadow: 0 8px 28px rgba(0, 30, 20, 0.05);
+      border: 1px solid #d4e8dd;
+      overflow-x: auto;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 0.5rem 1rem 0.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .table-header h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #1f4f3b;
+    }
+
+    .table-header h2 i {
+      color: #f5c542;
+      margin-right: 8px;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-group input {
+      padding: 0.5rem 1rem;
+      border: 2px solid #c8ddd0;
+      border-radius: 40px;
+      background: #fafffd;
+      font-size: 0.9rem;
+      outline: none;
+      transition: 0.2s;
+      width: 180px;
+    }
+
+    .filter-group input:focus {
+      border-color: #1f4f3b;
+      box-shadow: 0 0 0 3px rgba(31, 79, 59, 0.15);
+    }
+
+    .filter-group button {
+      background: #f5c542;
+      border: none;
+      color: #1f4f3b;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid #f5c542;
+    }
+
+    .filter-group button:hover {
+      background: #e6b53a;
+      border-color: #d9a531;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 1rem 0.5rem 0.8rem 0.5rem;
+      color: #1f4f3b;
+      font-weight: 600;
+      border-bottom: 2px solid #c8ddd0;
+      letter-spacing: 0.3px;
+    }
+
+    td {
+      padding: 0.9rem 0.5rem;
+      border-bottom: 1px solid #d4e8dd;
+      color: #1d3f30;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.9rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #d4e8dd;
+      color: #1f4f3b;
+    }
+
+    .status-badge.low { background: #fcf1d6; color: #8f6d1f; }
+    .status-badge.critical { background: #fad1c4; color: #a84a1a; }
+    .status-badge.in-stock { background: #cfe8d6; color: #1a6b3a; }
+
+    .action-icons i {
+      margin: 0 6px;
+      color: #3d7b62;
+      cursor: default;
+      opacity: 0.7;
+      transition: 0.15s;
+      font-size: 1.1rem;
+    }
+
+    .action-icons i:hover {
+      opacity: 1;
+      color: #1f4f3b;
+    }
+
+    .footer-note {
+      margin-top: 2.5rem;
+      text-align: center;
+      color: #2d5e48;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      border-top: 1px solid #c8ddd0;
+      padding-top: 1.8rem;
+    }
+
+    .footer-note i { margin: 0 4px; }
+    .footer-note .yellow-dot { color: #f5c542; }
+
+    /* page content panels (for other pages) */
+    .page-panel {
+      display: none;
+      background: white;
+      border-radius: 28px;
+      padding: 2rem 2rem;
+      box-shadow: 0 8px 28px rgba(0, 30, 20, 0.05);
+      border: 1px solid #d4e8dd;
+    }
+
+    .page-panel.active-page {
+      display: block;
+    }
+
+    .page-panel h2 {
+      color: #1f4f3b;
+      margin-bottom: 1rem;
+    }
+
+    .page-panel i {
+      color: #f5c542;
+      margin-right: 10px;
+    }
+
+    .page-panel .placeholder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .page-panel .placeholder-card {
+      background: #f8fcf9;
+      padding: 1.5rem 1rem;
+      border-radius: 20px;
+      border-left: 6px solid #1f4f3b;
+      text-align: center;
+      color: #1f4f3b;
+    }
+
+    .page-panel .placeholder-card i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #f5c542;
+    }
+
+    @media (max-width: 700px) {
+      .navbar { flex-direction: column; align-items: stretch; gap: 0.8rem; }
+      .nav-links { justify-content: center; }
+      .page-header h1 { font-size: 1.8rem; }
+      .filter-group input { width: 140px; }
+      .stat-card { padding: 1rem 0.8rem; }
+    }
+
+    tr.low-stock td { background-color: #fffae6; }
+    tr.critical-stock td { background-color: #ffefeb; }
+  </style>
+</head>
+<body>
+
+  <!-- ========== HEADER / NAV ========== -->
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-pills"></i> MedStock
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a class="nav-link active" data-page="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+      <a class="nav-link" data-page="inventory"><i class="fas fa-boxes"></i> Inventory</a>
+      <a class="nav-link" data-page="add"><i class="fas fa-plus-circle"></i> Add</a>
+      <a class="nav-link" data-page="reports"><i class="fas fa-chart-line"></i> Reports</a>
+      <a class="nav-link" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+    </div>
+  </nav>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="container">
+
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div id="page-dashboard" class="page-panel active-page">
+      <div class="page-header">
+        <h1><i class="fas fa-capsules"></i> Medicine Stock Checker</h1>
+        <p><i class="fas fa-arrow-right" style="color:#1f4f3b;"></i> Real‑time inventory · green &amp; yellow theme</p>
+      </div>
+
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <i class="fas fa-prescription-bottle-alt"></i>
+          <div class="stat-info">
+            <h3>Total medicines</h3>
+            <div class="number" id="totalMedCount">7</div>
+            <div class="sub">+3 this month</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-exclamation-triangle" style="color:#c99a2b;"></i>
+          <div class="stat-info">
+            <h3>Low stock</h3>
+            <div class="number" style="color:#a87d1f;" id="lowStockCount">2</div>
+            <div class="sub">needs attention</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-circle-exclamation" style="color:#b85f1f;"></i>
+          <div class="stat-info">
+            <h3>Critical</h3>
+            <div class="number" style="color:#a84a1a;" id="criticalCount">1</div>
+            <div class="sub">reorder now</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-check-circle" style="color:#1e8b4c;"></i>
+          <div class="stat-info">
+            <h3>In stock</h3>
+            <div class="number" style="color:#1a7a42;" id="inStockCount">4</div>
+            <div class="sub">ready to dispense</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <div class="table-header">
+          <h2><i class="fas fa-list-ul"></i> Current stock</h2>
+          <div class="filter-group">
+            <input type="text" id="searchInput" placeholder="🔍 Search medicine..." aria-label="search">
+            <button id="filterBtn"><i class="fas fa-filter"></i> Filter</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="medicineTableBody"></tbody>
+        </table>
+        <div style="padding: 0.8rem 0.5rem 0.2rem; color:#3d6e57; font-size:0.8rem; border-top: 1px solid #d4e8dd; margin-top:0.5rem;">
+          <i class="fas fa-circle-info"></i> <span id="rowCountDisplay">7</span> of 7 medicines · last updated today
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.2rem; gap: 1rem; flex-wrap: wrap;">
+        <span style="background: #e2f0e8; padding: 0.3rem 1rem; border-radius: 30px; font-size:0.85rem; color:#1f4f3b;">
+          <i class="fas-regular fa-clock"></i> Auto‑refresh: 5 min
+        </span>
+        <span style="background: #f5f0d7; padding: 0.3rem 1rem; border-radius: 30px; font-size:0.85rem; color:#5a4a1f; border: 1px solid #f5c542;">
+          <i class="fas fa-print"></i> Export
+        </span>
+      </div>
+    </div>
+
+    <!-- ===== INVENTORY PAGE ===== -->
+    <div id="page-inventory" class="page-panel">
+      <div class="page-header">
+        <h1><i class="fas fa-boxes"></i> Full Inventory</h1>
+        <p>Manage all medicine records · stock levels &amp; categories</p>
+      </div>
+      <div class="table-wrapper">
+        <div class="table-header">
+          <h2><i class="fas fa-warehouse"></i> Inventory list</h2>
+          <div class="filter-group">
+            <input type="text" id="inventorySearch" placeholder="🔍 Search...">
+            <button id="inventoryFilterBtn"><i class="fas fa-filter"></i> Filter</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="inventoryTableBody"></tbody>
+        </table>
+        <div style="padding: 0.8rem 0.5rem 0.2rem; color:#3d6e57; font-size:0.8rem; border-top: 1px solid #d4e8dd; margin-top:0.5rem;">
+          <i class="fas fa-circle-info"></i> Full inventory list · <span id="inventoryCount">7</span> items
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADD PAGE ===== -->
+    <div id="page-add" class="page-panel">
+      <div class="page-header">
+        <h1><i class="fas fa-plus-circle"></i> Add New Medicine</h1>
+        <p>Enter details to add a new stock entry</p>
+      </div>
+      <div style="background: #f8fcf9; border-radius: 24px; padding: 2rem; border: 1px solid #d4e8dd;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <div><label style="font-weight:600; color:#1f4f3b;">Medicine name</label><input type="text" placeholder="e.g. Ibuprofen 400mg" style="width:100%; padding:0.7rem; border-radius:40px; border:2px solid #c8ddd0; margin-top:6px;"></div>
+          <div><label style="font-weight:600; color:#1f4f3b;">Category</label><input type="text" placeholder="e.g. Anti-inflammatory" style="width:100%; padding:0.7rem; border-radius:40px; border:2px solid #c8ddd0; margin-top:6px;"></div>
+          <div><label style="font-weight:600; color:#1f4f3b;">Stock quantity</label><input type="number" placeholder="0" style="width:100%; padding:0.7rem; border-radius:40px; border:2px solid #c8ddd0; margin-top:6px;"></div>
+          <div style="display:flex; align-items:flex-end;"><button style="background:#1f4f3b; color:white; padding:0.7rem 2rem; border-radius:40px; border:none; font-weight:600; width:100%;"><i class="fas fa-save"></i> Save</button></div>
+        </div>
+        <div style="margin-top:1.5rem; background:#f5f0d7; padding:0.8rem 1.2rem; border-radius:40px; border-left:6px solid #f5c542;">
+          <i class="fas fa-info-circle" style="color:#1f4f3b;"></i> Use the form above to add new medicines to the stock.
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REPORTS PAGE ===== -->
+    <div id="page-reports" class="page-panel">
+      <div class="page-header">
+        <h1><i class="fas fa-chart-line"></i> Reports &amp; Analytics</h1>
+        <p>Stock movement, expiries, and consumption trends</p>
+      </div>
+      <div class="placeholder-grid">
+        <div class="placeholder-card"><i class="fas fa-chart-pie"></i><h3>Stock by category</h3><p>Analgesic · Antibiotic · etc.</p></div>
+        <div class="placeholder-card"><i class="fas fa-chart-bar"></i><h3>Monthly movement</h3><p>+12% this month</p></div>
+        <div class="placeholder-card"><i class="fas fa-clock"></i><h3>Expiry alert</h3><p>3 items expiring soon</p></div>
+        <div class="placeholder-card"><i class="fas fa-file-alt"></i><h3>Generate report</h3><p>PDF / Excel export</p></div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS PAGE ===== -->
+    <div id="page-settings" class="page-panel">
+      <div class="page-header">
+        <h1><i class="fas fa-cog"></i> Settings</h1>
+        <p>Configure stock thresholds, notifications &amp; preferences</p>
+      </div>
+      <div style="background:#f8fcf9; border-radius:24px; padding:1.5rem 2rem; border:1px solid #d4e8dd;">
+        <div style="display:flex; flex-wrap:wrap; gap:2rem; align-items:center;">
+          <div><i class="fas fa-bell" style="color:#f5c542;"></i> <strong>Low stock alert:</strong> <span style="background:#fcf1d6; padding:0.2rem 1rem; border-radius:40px;">10 units</span></div>
+          <div><i class="fas fa-bell" style="color:#f5c542;"></i> <strong>Critical alert:</strong> <span style="background:#fad1c4; padding:0.2rem 1rem; border-radius:40px;">5 units</span></div>
+          <div><i class="fas fa-envelope"></i> <strong>Email notifications:</strong> <span style="color:#1f4f3b;">on</span></div>
+          <div><button style="background:#f5c542; border:none; padding:0.5rem 1.5rem; border-radius:40px; font-weight:600; color:#1f4f3b;"><i class="fas fa-save"></i> Save settings</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- /container -->
+
+  <!-- footer -->
+  <div class="footer-note">
+    <i class="fas fa-copyright"></i> 2026 MedStock ·  <i class="fas fa-pulse fa-circle yellow-dot"></i>  all pages functional  ·  green & yellow
+  </div>
+
+  <!-- ========== JAVASCRIPT ========== -->
+  <script>
+    (function() {
+      // ----- medicine data (exactly as in screenshot) -----
+      const medicineData = [
+        { name: 'Paracetamol 500mg', category: 'Analgesic', stock: 142 },
+        { name: 'Amoxicillin 250mg', category: 'Antibiotic', stock: 22 },
+        { name: 'Insulin Glargine 100U', category: 'Endocrine', stock: 4 },
+        { name: 'Atorvastatin 20mg', category: 'Lipid-lowering', stock: 87 },
+        { name: 'Metformin 850mg', category: 'Antidiabetic', stock: 8 },
+        { name: 'Vitamin D3 1000IU', category: 'Supplement', stock: 0 },
+        { name: 'Omeprazole 40mg', category: 'PPI', stock: 56 }
+      ];
+
+      function getStatus(stock) {
+        if (stock <= 0) return { label: 'Critical', className: 'critical', icon: 'fa-triangle-exclamation' };
+        if (stock < 10) return { label: 'Low', className: 'low', icon: 'fa-exclamation-circle' };
+        return { label: 'In stock', className: 'in-stock', icon: 'fa-check-circle' };
+      }
+
+      // render function for dashboard
+      function renderDashboard(filterText = '') {
+        const tbody = document.getElementById('medicineTableBody');
+        const term = filterText.toLowerCase().trim();
+        let filtered = medicineData;
+        if (term) {
+          filtered = medicineData.filter(item => 
+            item.name.toLowerCase().includes(term) || 
+            item.category.toLowerCase().includes(term)
+          );
+        }
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#3d6e57;">No medicines found</td></tr>`;
+          document.getElementById('rowCountDisplay').textContent = '0';
+          return;
+        }
+        let html = '';
+        filtered.forEach(item => {
+          const status = getStatus(item.stock);
+          const rowClass = (status.className === 'low') ? 'low-stock' : (status.className === 'critical' ? 'critical-stock' : '');
+          html += `
+            <tr class="${rowClass}">
+              <td><i class="fas fa-tablets" style="color:#1f4f3b; margin-right:10px;"></i> ${item.name}</td>
+              <td>${item.category}</td>
+              <td>${item.stock}</td>
+              <td><span class="status-badge ${status.className}"><i class="fas ${status.icon}"></i> ${status.label}</span></td>
+              <td class="action-icons">
+                <i class="fas fa-eye" title="View"></i>
+                <i class="fas fa-edit" title="Edit"></i>
+                <i class="fas fa-arrow-up" title="Restock"></i>
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+        document.getElementById('rowCountDisplay').textContent = filtered.length;
+        updateStats(medicineData);
+      }
+
+      // render inventory page (full list)
+      function renderInventory(filterText = '') {
+        const tbody = document.getElementById('inventoryTableBody');
+        const term = filterText.toLowerCase().trim();
+        let filtered = medicineData;
+        if (term) {
+          filtered = medicineData.filter(item => 
+            item.name.toLowerCase().includes(term) || 
+            item.category.toLowerCase().includes(term)
+          );
+        }
+        if (filtered.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:#3d6e57;">No items</td></tr>`;
+          document.getElementById('inventoryCount').textContent = '0';
+          return;
+        }
+        let html = '';
+        filtered.forEach(item => {
+          const status = getStatus(item.stock);
+          const rowClass = (status.className === 'low') ? 'low-stock' : (status.className === 'critical' ? 'critical-stock' : '');
+          html += `
+            <tr class="${rowClass}">
+              <td><i class="fas fa-tablets" style="color:#1f4f3b; margin-right:10px;"></i> ${item.name}</td>
+              <td>${item.category}</td>
+              <td>${item.stock}</td>
+              <td><span class="status-badge ${status.className}"><i class="fas ${status.icon}"></i> ${status.label}</span></td>
+              <td class="action-icons">
+                <i class="fas fa-eye" title="View"></i>
+                <i class="fas fa-edit" title="Edit"></i>
+                <i class="fas fa-arrow-up" title="Restock"></i>
+              </td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+        document.getElementById('inventoryCount').textContent = filtered.length;
+      }
+
+      function updateStats(data) {
+        let total = data.length, low = 0, critical = 0, inStock = 0;
+        data.forEach(item => {
+          if (item.stock <= 0) critical++;
+          else if (item.stock < 10) low++;
+          else inStock++;
+        });
+        document.getElementById('totalMedCount').textContent = total;
+        document.getElementById('lowStockCount').textContent = low;
+        document.getElementById('criticalCount').textContent = critical;
+        document.getElementById('inStockCount').textContent = inStock;
+      }
+
+      // ----- navigation: switch pages -----
+      const navLinks = document.querySelectorAll('.nav-link');
+      const pages = {
+        dashboard: document.getElementById('page-dashboard'),
+        inventory: document.getElementById('page-inventory'),
+        add: document.getElementById('page-add'),
+        reports: document.getElementById('page-reports'),
+        settings: document.getElementById('page-settings')
+      };
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const page = this.dataset.page;
+          // update active class
+          navLinks.forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+          // hide all pages
+          Object.values(pages).forEach(p => p.classList.remove('active-page'));
+          // show selected
+          if (pages[page]) pages[page].classList.add('active-page');
+        });
+      });
+
+      // ----- dashboard search -----
+      document.getElementById('filterBtn').addEventListener('click', function() {
+        renderDashboard(document.getElementById('searchInput').value);
+      });
+      document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') renderDashboard(this.value);
+      });
+
+      // ----- inventory search -----
+      document.getElementById('inventoryFilterBtn').addEventListener('click', function() {
+        renderInventory(document.getElementById('inventorySearch').value);
+      });
+      document.getElementById('inventorySearch').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') renderInventory(this.value);
+      });
+
+      // initial render
+      renderDashboard('');
+      renderInventory('');
+
+      // double-click header to reset dashboard search
+      document.querySelector('.table-header h2').addEventListener('dblclick', function() {
+        document.getElementById('searchInput').value = '';
+        renderDashboard('');
+      });
+
+    })();
+  </script>
+
+</body>
+</html>
